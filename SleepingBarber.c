@@ -21,8 +21,8 @@ sem_t customer_ready;
 sem_t modifySeats;
 
 /* Inputs */
-int chair_cnt;
-int total_custs;
+int chair_count;
+int total_customers;
 
 int available_seats;
 int leaving_custs_without_service = 0;
@@ -60,7 +60,7 @@ void * barber_function(void *idp)
 
         printf("Customer was served.\n");
         counter++;
-        if(counter == (total_custs - leaving_custs_without_service))
+        if(counter == (total_customers - leaving_custs_without_service))
             break;
 
     }
@@ -127,7 +127,7 @@ void * make_customer_function(){
     int tmp;
     int counter = 0;
 
-    while(counter < total_custs)
+    while(counter < total_customers)
     {
         /* Declare and create a customer thread */
         pthread_t customer_thread;
@@ -165,12 +165,12 @@ int main(){
     sem_init(&modifySeats, 0, 1);
 
     printf("Please enter the number of seats: \n");
-    scanf("%d", &chair_cnt);
+    scanf("%d", &chair_count);
 
     printf("Please enter the total customers: \n");
-    scanf("%d", &total_custs);
+    scanf("%d", &total_customers);
 
-    available_seats = chair_cnt;
+    available_seats = chair_count;
 
     /* Create barber thread*/
     tmp = pthread_create(&barber_1, NULL, (void *)barber_function, NULL);
@@ -187,6 +187,6 @@ int main(){
     pthread_join(customer_maker, NULL);
 
     printf("\n------------------------------------------------\n");
-    printf("Average customers' waiting time: %f ms.\n", (waiting_time_sum / (double) (total_custs - leaving_custs_without_service)));
+    printf("Average customers' waiting time: %f ms.\n", (waiting_time_sum / (double) (total_customers - leaving_custs_without_service)));
     printf("Number of customers that were forced to leave: %d\n", leaving_custs_without_service);
 }
