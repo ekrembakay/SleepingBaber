@@ -13,7 +13,7 @@ void service_customer();
 void * make_customer_function();
 
 /* Mutex*/
-pthread_mutex_t srvCust;
+pthread_mutex_t serveCustomer;
 
 /* Semaphores */
 sem_t barber_ready;
@@ -25,7 +25,7 @@ int chair_cnt;
 int total_custs;
 
 int available_seats;
-int no_served_custs = 0;
+int leaving_custs_without_service = 0;
 double waiting_time_sum;
 
 void * barber_function(void *idp)
@@ -49,18 +49,18 @@ void * barber_function(void *idp)
         /*Unlock semaphore "barber_ready" - set barber ready to serve" */
         sem_post(&barber_ready);
 
-        /* Lock mutex "srvCust - protect service from the same barber from other threads */
-        pthread_mutex_lock(&srvCust);
+        /* Lock mutex "serveCustomer - protect service from the same barber against other threads */
+        pthread_mutex_lock(&serveCustomer);
 
         /* serve customer */
         service_customer();
 
-        /* Unlock mutex "srvCust - finished service */
-        pthread_mutex_unlock(&srvCust);
+        /* Unlock mutex "serveCustomer - finished service */
+        pthread_mutex_unlock(&serveCustomer);
 
         printf("Customer was served.\n");
         counter++;
-        if(counter == (total_custs - no_served_custs))
+        if(counter == (total_custs - leaving_custs_without_service))
             break;
 
     }
@@ -108,7 +108,7 @@ void * customer_function(void *idp)
     {
         /* Unlock semaphore "modifySeats" */
         sem_post(&modifySeats);
-        no_served_custs++;
+        leaving_custs_without_service++;
         printf("A Customer left.\n");
     }
 
@@ -157,7 +157,7 @@ int main(){
     int tmp;
 
     /* Initialize the mutex */
-    pthread_mutex_init(&srvCust, NULL);
+    pthread_mutex_init(&serveCustomer, NULL);
 
     /* Initialize semaphores */
     sem_init(&customer_ready, 0, 0);
@@ -187,6 +187,6 @@ int main(){
     pthread_join(customer_maker, NULL);
 
     printf("\n------------------------------------------------\n");
-    printf("Average customers' waiting time: %f ms.\n", (waiting_time_sum / (double) (total_custs - no_served_custs)));
-    printf("Number of customers that were forced to leave: %d\n", no_served_custs);
+    printf("Average customers' waiting time: %f ms.\n", (waiting_time_sum / (double) (total_custs - leaving_custs_without_service)));
+    printf("Number of customers that were forced to leave: %d\n", leaving_custs_without_service);
 }
