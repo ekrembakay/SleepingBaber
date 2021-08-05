@@ -26,7 +26,7 @@ int total_custs;
 
 int available_seats;
 int no_served_custs = 0;
-time_t waiting_time_sum;
+double waiting_time_sum;
 
 void * barber_function(void *idp)
 {
@@ -101,7 +101,7 @@ void * customer_function(void *idp)
         double sec = (double)(stop.tv_usec - start.tv_usec) / 1000000 + (double)(stop.tv_sec - start.tv_sec);
 
         /* Assigning the time spent to global variable (ms)*/
-        waiting_time_sum += 1000 * sec;
+        waiting_time_sum = waiting_time_sum + (1000 * sec);
         printf("Customer[pid = %lu] is being served. \n", pthread_self());
     }
     else
